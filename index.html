@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Selector: Matchmaking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        :root {
+            --primary-color: #f87171;
+            --secondary-color: #60a5fa;
+            --background-color: #1f2937;
+            --card-color: #374151;
+            --text-color: #f9fafb;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background-color); }
+        .container-box { background-color: var(--card-color); box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3); }
+        .btn-action { background-color: var(--primary-color); transition: transform 0.1s; }
+        .btn-action:hover { background-color: #ef4444; transform: translateY(-2px); }
+        .gift-box-icon { cursor: pointer; transition: transform 0.3s ease-in-out; }
+        .gift-box-icon:hover { transform: scale(1.05); }
+        input[type="checkbox"]:checked { background-color: var(--secondary-color); border-color: var(--secondary-color); }
+        .step { transition: opacity 0.3s ease-in-out; }
+        .loader { border-left-color: #ec4899; }
+        #intro-screen { background: linear-gradient(135deg, #1f2937, #374151); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- INTRO SCREEN -->
+    <div id="intro-screen" class="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6 z-10">
+        <h1 class="text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-500">DREAM GIRL MATCH</h1>
+        <p class="text-xl mb-8 max-w-md">Find your perfect soulmate using our advanced AI algorithm.</p>
+        <button onclick="startApp()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-2xl transform hover:scale-105">FIND YOUR MATCH NOW!</button>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <div id="app-content" class="hidden w-full max-w-lg mx-auto">
+        <div class="container-box w-full p-6 rounded-xl text-white">
+            <div id="slideshow-container" class="mb-8 text-center">
+                <h1 class="text-3xl font-extrabold mb-2 text-pink-400">Lovelink Matchmaker</h1>
+                <div class="w-full max-w-[250px] h-[350px] mx-auto rounded-lg overflow-hidden border-2 border-pink-500 mb-4">
+                    <img id="slideshow-image" src="https://placehold.co/300x400/94a3b8/FFF?text=Scanning..." class="w-full h-full object-cover transition-opacity duration-500" />
+                </div>
+                <span id="slide-text" class="block font-bold text-gray-200">Initializing...</span>
+            </div>
+
+            <form id="preference-form" class="space-y-6">
+                <h2 class="text-xl font-bold border-b border-gray-600 pb-2">Step <span id="step-number">1</span> of 3</h2>
+                
+                <div id="step-1" class="step space-y-4">
+                    <p class="font-semibold text-pink-300">&#9658; Select Physic/Body Type:</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="body" value="Slim"/> <span>Slim/Toned</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="body" value="Curvy"/> <span>Curvy/Full</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="body" value="Chubby"/> <span>Chubby/Soft</span></label>
+                    </div>
+                    <button type="button" onclick="handleNext()" class="btn-action w-full py-3 rounded-lg font-bold">Next</button>
+                </div>
+
+                <div id="step-2" class="step space-y-4 hidden">
+                    <p class="font-semibold text-blue-300">&#9658; Select Height:</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="height" value="Short"/> <span>Petite/Short</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="height" value="Average"/> <span>Average</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="height" value="Tall"/> <span>Tall</span></label>
+                    </div>
+                    <button type="button" onclick="handleNext()" class="btn-action w-full py-3 rounded-lg font-bold">Next</button>
+                </div>
+
+                <div id="step-3" class="step space-y-4 hidden">
+                    <p class="font-semibold text-green-300">&#9658; Select Traits:</p>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="trait" value="Funny"/> <span>Funny</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="trait" value="Smart"/> <span>Smart</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="trait" value="Adventurous"/> <span>Adventurous</span></label>
+                    </div>
+                    <button type="submit" class="btn-action w-full py-3 rounded-lg font-bold">Generate Match</button>
+                </div>
+            </form>
+
+            <div id="loading-screen" class="hidden text-center p-8">
+                <div class="loader animate-spin rounded-full h-12 w-12 border-4 mx-auto mb-4 border-pink-400"></div>
+                <p id="loading-text" class="text-yellow-300 font-bold">Analyzing profiles...</p>
+            </div>
+
+            <div id="gift-container" class="hidden text-center mt-10">
+                <h2 class="text-2xl font-bold text-green-400 mb-4">MATCH FOUND!</h2>
+                <div id="gift-box" class="gift-box-icon mx-auto w-24 h-24 text-yellow-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V7.5a2.5 2.5 0 0 0-5 0v5h-5a2.5 2.5 0 0 0-5 0V12h10"/><path d="M12 22h8a2 2 0 0 0 2-2V7.5a2.5 2.5 0 0 0-5 0v5h-5"/><path d="M4 12V7.5a2.5 2.5 0 0 1 5 0v5h-5"/><path d="M12 22H4a2 2 0 0 1-2-2V7.5a2.5 2.5 0 0 1 5 0v5h5"/></svg>
+                </div>
+                <p class="animate-pulse text-yellow-400 mt-2 font-bold">OPEN GIFT</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRANK MODAL -->
+    <div id="prank-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white p-6 rounded-2xl max-w-sm w-full text-center relative">
+            <h3 class="text-2xl font-black text-red-600 mb-4">YOU GOT PRANKED!</h3>
+            <img src="https://placehold.co/400x400/1E90FF/FFF?text=PRANKED!%0A+%F0%9F%A4%A1" class="rounded-lg mb-4"/>
+            <button onclick="document.getElementById('prank-modal').classList.add('hidden')" class="bg-gray-800 text-white px-4 py-2 rounded">Close</button>
+        </div>
+    </div>
+  <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Firebase Config (Provided by environment)
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'prank-match';
+
+        let choices = { body: [], height: [], trait: [] };
+        let currentStep = 1;
+
+        window.startApp = () => {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            startSlideshow();
+        };
+
+        window.handleNext = () => {
+            const inputs = document.querySelectorAll(`#step-${currentStep} input:checked`);
+            if (inputs.length === 0) return;
+            
+            // Save choices to local object
+            const name = currentStep === 1 ? 'body' : 'height';
+            choices[name] = Array.from(inputs).map(i => i.value);
+
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            currentStep++;
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById('step-number').textContent = currentStep;
+        };
+
+        const form = document.getElementById('preference-form');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const traitInputs = document.querySelectorAll('#step-3 input:checked');
+            if (traitInputs.length === 0) return;
+            choices.trait = Array.from(traitInputs).map(i => i.value);
+
+            form.classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            // --- THE SAVE LOGIC ---
+            try {
+                await signInAnonymously(auth);
+                // Save to the path specified in Rule 1
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'prank_results'), {
+                    selections: choices,
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+            } catch (err) { console.error("Save failed", err); }
+
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('gift-container').classList.remove('hidden');
+            }, 3000);
+        };
+
+        document.getElementById('gift-box').onclick = () => {
+            document.getElementById('prank-modal').classList.remove('hidden');
+        };
+
+        function startSlideshow() {
+            const img = document.getElementById('slideshow-image');
+            const txt = document.getElementById('slide-text');
+            const slides = ["Scanning Profiles...", "Analyzing Types...", "Match Found!"];
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % slides.length;
+                txt.textContent = slides[i];
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
